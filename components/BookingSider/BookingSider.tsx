@@ -14,12 +14,12 @@ export const BookingSider = () => {
       <Card className="max-w-[400px] h-full">
         <CardHeader className="flex gap-3">
           <div className="flex flex-col">
-            <p className="text-md">
+            <div className="text-md">
               <User
                 avatarProps={{ src: profile.avatar }}
                 name={profile.login}
               />
-            </p>
+            </div>
           </div>
         </CardHeader>
         <CardBody>
