@@ -8,12 +8,14 @@ import {
   OccupiedSeat,
   SeatAreaLayout,
   SeatItemState,
+  SeatPosition,
   SeatState,
 } from "./types";
 
 export interface SeatViewProps {
   layouts: SeatAreaLayout[];
   occupiedSeats: OccupiedSeat[];
+  notAvailableSeats: SeatPosition[];
   updateOccupiedSeats: (seats: OccupiedSeat[]) => void;
 }
 
@@ -21,6 +23,7 @@ export const SeatView = ({
   layouts,
   occupiedSeats,
   updateOccupiedSeats,
+  notAvailableSeats,
 }: SeatViewProps) => {
   const profile = useContext(LogonUserContext);
   const selectedSeats: SeatItemState[] = occupiedSeats.map((s) => {
@@ -31,8 +34,21 @@ export const SeatView = ({
         s.login === profile.login ? SeatState.Selected : SeatState.Occupied,
     };
   });
+
+  const notAvailableSeatsState: SeatItemState[] = notAvailableSeats.map(
+    ({ row, col }) => ({
+      row,
+      col,
+      state: SeatState.NotAvailable,
+    }),
+  );
+
   const onSeatClick = (seat: SeatItemState) => {
-    if (seat.state === SeatState.Occupied) return;
+    if (
+      seat.state === SeatState.Occupied ||
+      seat.state === SeatState.NotAvailable
+    )
+      return;
 
     let copy = [...occupiedSeats];
 
@@ -75,7 +91,7 @@ export const SeatView = ({
               key={index}
               columnOffset={columnOffset}
               layout={layout}
-              selected={selectedSeats}
+              selected={[...selectedSeats, ...notAvailableSeatsState]}
               onClick={onSeatClick}
             />
           );

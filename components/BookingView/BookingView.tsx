@@ -9,6 +9,7 @@ import { OccupiedSeat } from "../SeatView/types";
 
 import { fakeMovieList } from "./movieData";
 import { MovieModel, PlayingTimeNames } from "./types";
+import { BookingStats } from "./BookingStats";
 
 import { useLocalStorage } from "@/hooks/storage";
 import { StorageKeyMovies } from "@/constants/storageKeys";
@@ -31,6 +32,20 @@ export const BookingView = () => {
     ? (selectedMovie?.plays?.find((p) => p.time === selectedMoviePlayingTime) ??
       null)
     : null;
+  const allSeats =
+    selectedMoviePlaying?.seatsLayout.map((l) => l.seats).flat() || [];
+
+  const [selectedPrice, setSelectedPrice] = useState<number | null>(null);
+  const availablePrices =
+    selectedMovie?.price && allSeats
+      ? [...new Set(allSeats.map((s) => s.factor) ?? [])].map(
+          (f) => f * selectedMovie.price,
+        )
+      : [];
+  const notAvailableSeats =
+    selectedMovie?.price && selectedPrice
+      ? allSeats.filter((s) => s.factor * selectedMovie.price === selectedPrice)
+      : [];
 
   const updateOccupiedSeats = (seats: OccupiedSeat[]) => {
     if (!selectedMovieId) return;
@@ -104,13 +119,41 @@ export const BookingView = () => {
             ))}
           </Select>
         )}
+
+        {selectedMovie && selectedMoviePlaying && (
+          <Select
+            className="w-[300px]"
+            label="选择票价"
+            selectedKeys={selectedPrice ? [`${selectedPrice}`] : []}
+            onSelectionChange={(value) => {
+              setSelectedPrice(value.currentKey ? +value.currentKey : null);
+            }}
+          >
+            {availablePrices.map((price) => (
+              <SelectItem key={`${price}`} textValue={`$${price}`}>
+                ${price}
+              </SelectItem>
+            ))}
+          </Select>
+        )}
       </div>
 
+      {/* 座位选择视图。 */}
       {selectedMovie && selectedMoviePlaying && (
         <SeatView
           layouts={selectedMoviePlaying.seatsLayout}
+          notAvailableSeats={notAvailableSeats}
           occupiedSeats={selectedMoviePlaying.occupiedSeats}
           updateOccupiedSeats={updateOccupiedSeats}
+        />
+      )}
+
+      {/* 剩余座位、用户预定的座位实时展示。 */}
+      {selectedMovie && selectedMoviePlaying && (
+        <BookingStats
+          layouts={selectedMoviePlaying.seatsLayout}
+          movie={selectedMovie}
+          occupiedSeats={selectedMoviePlaying.occupiedSeats}
         />
       )}
     </div>

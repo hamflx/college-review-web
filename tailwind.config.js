@@ -15,7 +15,8 @@ module.exports = {
         mono: ["var(--font-mono)"],
       },
       colors: {
-        'seat-available': '#444450',
+        'seat-na': '#444450',
+        'seat-available': '#939393',
         'seat-selected': '#70eaf7',
         'seat-occupied': '#feffff',
       },

@@ -17,42 +17,39 @@ export const SeatArea = ({
   columnOffset,
   onClick,
 }: SeatAreaProps) => {
-  const { cols, rows } = layout;
+  const { cols, seats } = layout;
 
   return (
     <div
       className={`grid gap-1`}
       style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
     >
-      {Array.from({ length: rows })
-        .map((_, rowIndex) => {
-          return Array.from({ length: cols }).map((_, index) => {
-            const colIndex = index + columnOffset;
-            const seatKey = rowIndex * cols + colIndex;
-            const selectedSeat = selected.find(
-              (s) => s.col === colIndex && s.row === rowIndex,
-            );
-            const state = selectedSeat?.state ?? SeatState.Available;
+      {seats.map((_, seatIndex) => {
+        const colIndexInThisLayout = seatIndex % cols;
+        const rowIndex = Math.floor(seatIndex / cols);
+        const colIndex = colIndexInThisLayout + columnOffset;
+        const selectedSeat = selected.find(
+          (s) => s.col === colIndex && s.row === rowIndex,
+        );
+        const state = selectedSeat?.state ?? SeatState.Available;
 
-            return (
-              <SeatItem
-                key={seatKey}
-                state={state}
-                onClick={
-                  onClick
-                    ? () =>
-                        onClick({
-                          col: colIndex,
-                          row: rowIndex,
-                          state,
-                        })
-                    : undefined
-                }
-              />
-            );
-          });
-        })
-        .flat()}
+        return (
+          <SeatItem
+            key={seatIndex}
+            state={state}
+            onClick={
+              onClick
+                ? () =>
+                    onClick({
+                      col: colIndex,
+                      row: rowIndex,
+                      state,
+                    })
+                : undefined
+            }
+          />
+        );
+      })}
     </div>
   );
 };

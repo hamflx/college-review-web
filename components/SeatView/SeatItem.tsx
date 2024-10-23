@@ -7,6 +7,13 @@ export interface SeatItemProps {
 
 export const SeatItem = ({ state, onClick }: SeatItemProps) => {
   switch (state) {
+    case SeatState.NotAvailable:
+      return (
+        <span
+          className="inline-block w-3 h-3 rounded-[12px_12px_0_0] cursor-pointer bg-seat-na"
+          onClick={onClick}
+        />
+      );
     case SeatState.Available:
       return (
         <span
