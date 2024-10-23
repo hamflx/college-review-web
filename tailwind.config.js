@@ -1,4 +1,5 @@
-import {nextui} from '@nextui-org/theme'
+import {colors, nextui} from '@nextui-org/theme'
+import plugin from 'tailwindcss/plugin'
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -13,8 +14,27 @@ module.exports = {
         sans: ["var(--font-sans)"],
         mono: ["var(--font-mono)"],
       },
+      colors: {
+        'seat-available': '#444450',
+        'seat-selected': '#70eaf7',
+        'seat-occupied': '#feffff',
+      },
     },
   },
   darkMode: "class",
-  plugins: [nextui()],
+  plugins: [
+    nextui(),
+    plugin(function({ matchUtilities }) {
+      matchUtilities(
+        {
+          perspective: (value) => ({
+            perspective: `${value}`,
+          }),
+          'rotate-x': (value) => ({
+            transform: `rotateX(${value})`,
+          }),
+        },
+      )
+    }),
+  ],
 }
