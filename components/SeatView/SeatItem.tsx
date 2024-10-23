@@ -1,3 +1,5 @@
+import React from "react";
+
 import { SeatState } from "./types";
 
 export interface SeatItemProps {
@@ -38,4 +40,6 @@ export const SeatItem = ({ state, onClick }: SeatItemProps) => {
     default:
       const _: never = state;
   }
+
+  throw new Error("unreachable");
 };
