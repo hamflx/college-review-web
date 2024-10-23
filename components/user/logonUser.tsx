@@ -29,19 +29,19 @@ export const LogonUserContextProvider = ({
     StorageKeyUsers,
     fakeUserList,
   );
-  const [user, setUser] = useState<UserProfile>(userList[0]);
+  const [userId, setUserId] = useState<string>(userList[0].login);
+  const currentUser = userList.find((u) => u.login === userId)!;
   const switchUser = (user: UserProfile) => {
-    setUser(userList.find((u) => u.login === user.login)!);
+    setUserId(user.login);
   };
   const consumeBalance = (amount: number) => {
-    if (user.balance - amount < 0) {
+    if (currentUser.balance - amount < 0) {
       return false;
     }
-    const newUser = produce(user, (draft) => {
+    const newUser = produce(currentUser, (draft) => {
       draft.balance -= amount;
     });
 
-    setUser(newUser);
     setUserList(
       userList.map((u) => {
         if (u.login === newUser.login) {
@@ -56,7 +56,9 @@ export const LogonUserContextProvider = ({
   };
 
   return (
-    <LogonUserContext.Provider value={{ ...user, switchUser, consumeBalance }}>
+    <LogonUserContext.Provider
+      value={{ ...currentUser, switchUser, consumeBalance }}
+    >
       {children}
     </LogonUserContext.Provider>
   );
