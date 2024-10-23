@@ -16,13 +16,13 @@ export interface SeatViewProps {
   layouts: SeatAreaLayout[];
   occupiedSeats: OccupiedSeat[];
   notAvailableSeats: SeatPosition[];
-  updateOccupiedSeats: (seats: OccupiedSeat[]) => void;
+  onSeatClick?: (seat: SeatItemState) => void;
 }
 
 export const SeatView = ({
   layouts,
   occupiedSeats,
-  updateOccupiedSeats,
+  onSeatClick,
   notAvailableSeats,
 }: SeatViewProps) => {
   const profile = useContext(LogonUserContext);
@@ -42,32 +42,6 @@ export const SeatView = ({
       state: SeatState.NotAvailable,
     }),
   );
-
-  const onSeatClick = (seat: SeatItemState) => {
-    if (
-      seat.state === SeatState.Occupied ||
-      seat.state === SeatState.NotAvailable
-    )
-      return;
-
-    let copy = [...occupiedSeats];
-
-    switch (seat.state) {
-      case SeatState.Available:
-        copy.push({ col: seat.col, row: seat.row, login: profile.login });
-        break;
-      case SeatState.Selected:
-        copy.splice(
-          copy.findIndex((s) => s.row === seat.row && s.col === seat.col) >>> 0,
-          1,
-        );
-        break;
-      default:
-        const _: never = seat.state;
-    }
-
-    updateOccupiedSeats(copy);
-  };
 
   return (
     <div className="flex flex-col items-center gap-3">

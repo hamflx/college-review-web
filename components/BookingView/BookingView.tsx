@@ -1,11 +1,12 @@
 "use client";
 
 import { Select, SelectItem } from "@nextui-org/select";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { produce } from "immer";
 
 import { SeatView } from "../SeatView/SeatView";
-import { OccupiedSeat } from "../SeatView/types";
+import { OccupiedSeat, SeatItemState, SeatState } from "../SeatView/types";
+import { LogonUserContext } from "../user/logonUser";
 
 import { fakeMovieList } from "./movieData";
 import { MovieModel, PlayingTimeNames } from "./types";
@@ -44,7 +45,7 @@ export const BookingView = () => {
       : [];
   const notAvailableSeats =
     selectedMovie?.price && selectedPrice
-      ? allSeats.filter((s) => s.factor * selectedMovie.price === selectedPrice)
+      ? allSeats.filter((s) => s.factor * selectedMovie.price !== selectedPrice)
       : [];
 
   const updateOccupiedSeats = (seats: OccupiedSeat[]) => {
@@ -64,6 +65,40 @@ export const BookingView = () => {
     });
 
     setMovieList(newMovieList);
+  };
+
+  const profile = useContext(LogonUserContext);
+  const onSeatClick = (seat: SeatItemState) => {
+    if (
+      !selectedMovie ||
+      seat.state === SeatState.Occupied ||
+      seat.state === SeatState.NotAvailable
+    )
+      return;
+
+    let copy = [...(selectedMoviePlaying?.occupiedSeats || [])];
+    const factor =
+      allSeats.find((s) => s.row === seat.row && s.col === seat.col)?.factor ??
+      1;
+    const price = factor * selectedMovie.price;
+
+    switch (seat.state) {
+      case SeatState.Available:
+        if (!profile.consumeBalance(price)) return;
+        copy.push({ col: seat.col, row: seat.row, login: profile.login });
+        break;
+      case SeatState.Selected:
+        if (!profile.consumeBalance(-price)) return;
+        copy.splice(
+          copy.findIndex((s) => s.row === seat.row && s.col === seat.col) >>> 0,
+          1,
+        );
+        break;
+      default:
+        const _: never = seat.state;
+    }
+
+    updateOccupiedSeats(copy);
   };
 
   return (
@@ -144,7 +179,7 @@ export const BookingView = () => {
           layouts={selectedMoviePlaying.seatsLayout}
           notAvailableSeats={notAvailableSeats}
           occupiedSeats={selectedMoviePlaying.occupiedSeats}
-          updateOccupiedSeats={updateOccupiedSeats}
+          onSeatClick={onSeatClick}
         />
       )}
 
